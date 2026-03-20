@@ -339,12 +339,38 @@ function openLock() {
     initDialDrag();
 }
 
+// 随机密码（0-9），每次刷新都会变
+const correctPassword = Math.floor(Math.random() * 10);
+
 let dialValue = 0, currentRotation = 0;
 function initDialDrag() {
     const dial = document.getElementById('dial');
     let isDragging = false, startAngle = 0, startRotation = 0;
     
-    dial.addEventListener('mousedown', (e) => {
+    // 鼠标事件
+    dial.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', endDrag);
+    
+    // 触摸事件
+    dial.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = { clientX: touch.clientX, clientY: touch.clientY };
+        startDrag(mouseEvent);
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = { clientX: touch.clientX, clientY: touch.clientY };
+        drag(mouseEvent);
+    }, { passive: false });
+    
+    document.addEventListener('touchend', endDrag);
+    
+    function startDrag(e) {
         isDragging = true;
         const rect = dial.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -352,9 +378,9 @@ function initDialDrag() {
         startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
         startRotation = currentRotation;
         dial.style.cursor = 'grabbing';
-    });
+    }
     
-    document.addEventListener('mousemove', (e) => {
+    function drag(e) {
         if (!isDragging) return;
         const rect = dial.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -369,16 +395,16 @@ function initDialDrag() {
         document.getElementById('dialNumber').textContent = dialValue;
         
         if (Math.random() < 0.1) playTone(200 + dialValue * 50, 0.05, 0.15);
-    });
+    }
     
-    document.addEventListener('mouseup', () => {
+    function endDrag() {
         if (!isDragging) return;
         isDragging = false;
         dial.style.cursor = 'grab';
         currentRotation = dialValue * 36;
         dial.style.transform = `rotate(${currentRotation}deg)`;
         
-        if (dialValue === 3) {
+        if (dialValue === correctPassword) {
             setTimeout(() => {
                 document.getElementById('lockModal').classList.remove('active');
                 document.querySelectorAll('[style*="position:fixed"]').forEach(el => { if(el.style.width === '4px') el.remove(); });
@@ -387,7 +413,7 @@ function initDialDrag() {
                 setTimeout(showFinal, 2000);
             }, 500);
         }
-    });
+    }
 }
 
 function showFinal() {
