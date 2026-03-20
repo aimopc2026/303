@@ -93,14 +93,15 @@ function showScene(id) {
 
 setTimeout(() => { showScene('planetsScreen'); initAudio(); }, 3500);
 
-// 生成转盘数字
+// 生成转盘数字（逆时针排列，这样顺时针转动时数字递增）
 function createDialNumbers() {
     const dial = document.getElementById('dial');
     for (let i = 0; i < 10; i++) {
         const num = document.createElement('div');
         num.className = 'dial-number';
         num.textContent = i;
-        const angle = (i / 10) * Math.PI * 2 - Math.PI / 2;
+        // 逆时针排列：角度 = -i/10 * 360度 - 90度（从顶部开始）
+        const angle = -(i / 10) * Math.PI * 2 - Math.PI / 2;
         const x = 150 + Math.cos(angle) * 105;
         const y = 150 + Math.sin(angle) * 105;
         num.style.left = x + 'px';
