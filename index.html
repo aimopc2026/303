@@ -5,527 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>星语心愿</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: linear-gradient(to bottom, #0a0a1a 0%, #1a1a3e 50%, #2d1b4e 100%);
-            min-height: 100vh;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-        }
-        
-        #canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .ui-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-        
-        .center-star {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            pointer-events: auto;
-            cursor: pointer;
-            transition: all 0.5s ease;
-        }
-        
-        .center-star .star-icon {
-            font-size: 60px;
-            opacity: 0.3;
-            animation: pulse 2s ease-in-out infinite;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.6; }
-        }
-        
-        .center-star .hint-text {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
-            margin-top: 15px;
-            letter-spacing: 2px;
-        }
-        
-        .star-task {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            pointer-events: auto;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .star-task:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .star-task.completed {
-            background: rgba(255, 215, 0, 0.3);
-            border-color: rgba(255, 215, 0, 0.6);
-            animation: glow 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
-        }
-        
-        .star-task .icon {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        
-        .star-task .label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 11px;
-        }
-        
-        #memory-star { top: 20%; left: 20%; }
-        #time-star { top: 15%; right: 25%; }
-        #love-star { bottom: 25%; left: 50%; transform: translateX(-50%); }
-        
-        .message-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 300px;
-            z-index: 100;
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        
-        .message-popup.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-        
-        .message-popup .heart {
-            font-size: 40px;
-            margin-bottom: 15px;
-            animation: heartbeat 1s ease-in-out infinite;
-        }
-        
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-        
-        .message-popup .text {
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        
-        .message-popup .close-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.2s;
-        }
-        
-        .message-popup .close-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .final-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 50;
-            transition: opacity 2s ease;
-        }
-        
-        .final-message.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        .final-message .rose {
-            font-size: 100px;
-            margin-bottom: 20px;
-            animation: rose-float 3s ease-in-out infinite;
-        }
-        
-        @keyframes rose-float {
-            0%, 100% { transform: translateY(0) rotate(-5deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        
-        .final-message .text {
-            color: white;
-            font-size: 22px;
-            line-height: 1.8;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 30px;
-        }
-        
-        .final-message .restart-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            padding: 12px 40px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        
-        .final-message .restart-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: white;
-        }
-        
-        .progress-bar {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ffd700, #ff6b6b);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        
-        .hidden { display: none !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; min-height: 100vh; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity 1.5s; z-index: 10; }
+        .screen.active { opacity: 1; pointer-events: auto; }
+        .warp-screen { background: radial-gradient(ellipse at center, #0a0a2e 0%, #000 70%); }
+        .warp-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffd700; font-size: 36px; text-align: center; text-shadow: 0 0 50px rgba(255,215,0,0.9); letter-spacing: 10px; animation: text-glow 2s ease-in-out infinite; }
+        @keyframes text-glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        .warp-text .subtitle { font-size: 20px; margin-top: 30px; letter-spacing: 5px; }
+        .planet { position: absolute; width: 140px; height: 140px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 70px; transition: all 0.5s; box-shadow: 0 0 50px rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.2); z-index: 20; }
+        .planet:hover { transform: scale(1.2); box-shadow: 0 0 80px rgba(255,215,0,0.5); border-color: rgba(255,215,0,0.5); }
+        .planet.completed { animation: planet-pulse 2s infinite; box-shadow: 0 0 100px rgba(255,215,0,0.8); border-color: #ffd700; }
+        @keyframes planet-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        #planet-star { top: 22%; left: 12%; background: radial-gradient(circle at 35% 35%, #7aaaff, #3a6ab0); }
+        #planet-moon { top: 12%; right: 18%; background: radial-gradient(circle at 35% 35%, #fff9f0, #f0e0c0); }
+        #planet-heart { bottom: 18%; left: 50%; transform: translateX(-50%); background: radial-gradient(circle at 35% 35%, #ff9a9a, #f06060); }
+        .planet-label { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.9); font-size: 16px; letter-spacing: 4px; white-space: nowrap; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .game-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .game-modal.active { display: flex; }
+        .game-content { background: linear-gradient(135deg, rgba(25,25,70,0.98), rgba(45,30,85,0.98)); padding: 50px; border-radius: 40px; text-align: center; border: 3px solid rgba(255,215,0,0.4); max-width: 500px; box-shadow: 0 0 100px rgba(255,215,0,0.3); }
+        .game-title { color: #ffd700; font-size: 38px; margin-bottom: 20px; text-shadow: 0 0 40px rgba(255,215,0,0.7); letter-spacing: 6px; }
+        .game-instruction { color: rgba(255,255,255,0.85); font-size: 17px; margin-bottom: 30px; line-height: 1.8; }
+        .game-area { width: 400px; height: 320px; background: rgba(0,0,0,0.8); border-radius: 25px; margin: 30px 0; position: relative; overflow: hidden; border: 2px solid rgba(255,215,0,0.3); }
+        .game-btn { background: linear-gradient(135deg, #ffd700, #ff6b6b); color: white; border: none; padding: 18px 70px; border-radius: 35px; font-size: 20px; cursor: pointer; box-shadow: 0 8px 40px rgba(255,215,0,0.5); transition: all 0.3s; letter-spacing: 4px; }
+        .game-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 50px rgba(255,215,0,0.7); }
+        .confession-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 50; flex-direction: column; }
+        .confession-overlay.active { display: flex; }
+        .confession-text { color: #ffd700; font-size: 32px; line-height: 2.4; text-align: center; max-width: 800px; padding: 50px; text-shadow: 0 0 50px rgba(255,215,0,0.6); letter-spacing: 3px; }
+        .confession-text .line { opacity: 0; transform: translateY(30px); animation: fade-in-up 1.2s ease forwards; }
+        @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
+        .chest-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); perspective: 1200px; }
+        .chest { width: 240px; height: 200px; position: relative; animation: chest-float 4s ease-in-out infinite; transform-style: preserve-3d; }
+        @keyframes chest-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-25px); } }
+        .chest-body { position: absolute; bottom: 0; width: 100%; height: 65%; background: linear-gradient(135deg, #9B5523, #754321); border-radius: 0 0 20px 20px; box-shadow: 0 30px 80px rgba(0,0,0,0.9); border: 4px solid #5a3a1a; }
+        .chest-body::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 55px; height: 45px; background: linear-gradient(135deg, #ffd700, #ffaa00); border-radius: 10px; box-shadow: 0 0 40px rgba(255,215,0,0.7); }
+        .chest-lid { position: absolute; top: 0; width: 100%; height: 40%; background: linear-gradient(135deg, #B0622D, #9B5523); border-radius: 20px 20px 8px 8px; transform-origin: top; transition: transform 2s; box-shadow: 0 10px 50px rgba(0,0,0,0.8); border: 4px solid #5a3a1a; border-bottom: none; }
+        .chest-lid::before { content: '✦'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 45px; color: #ffd700; text-shadow: 0 0 40px rgba(255,215,0,1); }
+        .chest.open .chest-lid { transform: rotateX(-130deg); }
+        .chest-lock { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: linear-gradient(135deg, #ffe700, #ffc700); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; cursor: pointer; z-index: 10; box-shadow: 0 10px 40px rgba(255,215,0,0.8); border: 4px solid #ff9a00; animation: lock-pulse 2s infinite; }
+        .chest-lock:hover { transform: translate(-50%, -50%) scale(1.15); }
+        @keyframes lock-pulse { 0%, 100% { box-shadow: 0 10px 40px rgba(255,215,0,0.7); } 50% { box-shadow: 0 10px 60px rgba(255,215,0,1); } }
+        .lock-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; align-items: center; justify-content: center; z-index: 200; }
+        .lock-modal.active { display: flex; }
+        .lock-title { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); color: #ffd700; font-size: 36px; letter-spacing: 8px; text-shadow: 0 0 50px rgba(255,215,0,0.8); }
+        .dial-container { position: relative; width: 340px; height: 340px; }
+        .dial { position: absolute; top: 20px; left: 20px; width: 300px; height: 300px; border-radius: 50%; background: linear-gradient(135deg, #3a3a6a, #1a1a3a); cursor: grab; box-shadow: 0 0 80px rgba(255,215,0,0.4), inset 0 0 60px rgba(0,0,0,0.7); border: 4px solid rgba(255,215,0,0.4); }
+        .dial:active { cursor: grabbing; }
+        .dial-number { position: absolute; color: rgba(255,255,255,0.95); font-size: 28px; font-weight: bold; text-shadow: 0 0 15px rgba(0,0,0,0.9); transform: translate(-50%, -50%); }
+        .dial-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 110px; height: 110px; background: linear-gradient(135deg, #2a2a4a, #0a0a1a); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #ffd700; box-shadow: 0 0 60px rgba(255,215,0,0.8); }
+        .dial-center .number { color: #ffd700; font-size: 52px; font-weight: bold; text-shadow: 0 0 40px rgba(255,215,0,1); }
+        .dial-marker { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 40px solid #ffd700; filter: drop-shadow(0 0 25px rgba(255,215,0,1)); z-index: 20; }
+        .lock-hint { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.8); font-size: 20px; letter-spacing: 4px; }
+        .final-beam { position: absolute; top: -10%; left: 50%; transform: translateX(-50%) scaleY(0); width: 500px; height: 130vh; opacity: 0; transition: all 3s ease; }
+        .final-beam.active { transform: translateX(-50%) scaleY(1); opacity: 1; }
+        .beam-core { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 100%; background: linear-gradient(to bottom, transparent, rgba(255,215,0,0.98) 15%, rgba(255,100,100,0.95) 45%, rgba(255,215,0,0.98) 85%, transparent); filter: blur(3px); }
+        .beam-glow { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 350px; height: 100%; background: linear-gradient(to bottom, transparent, rgba(255,215,0,0.6) 15%, rgba(255,100,100,0.5) 45%, rgba(255,215,0,0.6) 85%, transparent); filter: blur(50px); }
+        .final-rose-container { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0; transition: all 2.5s ease 0.8s; z-index: 20; }
+        .final-rose-container.show { opacity: 1; }
+        .rose-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; height: 450px; border-radius: 50%; background: radial-gradient(circle, rgba(255,100,100,0.4) 0%, rgba(255,215,0,0.25) 35%, transparent 70%); animation: glow-pulse 3s ease-in-out infinite; }
+        @keyframes glow-pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; } 50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.9; } }
+        .final-rose { font-size: 280px; filter: drop-shadow(0 0 100px rgba(255,100,100,1)) drop-shadow(0 0 200px rgba(255,100,100,0.6)); animation: rose-bloom 5s ease-in-out infinite; position: relative; z-index: 10; }
+        @keyframes rose-bloom { 0%, 100% { transform: scale(1) rotate(-2deg); filter: drop-shadow(0 0 100px rgba(255,100,100,1)); } 50% { transform: scale(1.2) rotate(2deg); filter: drop-shadow(0 0 150px rgba(255,100,100,1)) drop-shadow(0 0 250px rgba(255,215,0,0.6)); } }
+        .final-text-container { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0; transition: opacity 2.5s ease 2s; z-index: 30; }
+        .final-text-container.show { opacity: 1; }
+        .final-text { color: white; font-size: 30px; line-height: 2.4; text-shadow: 0 3px 40px rgba(0,0,0,1); background: rgba(0,0,0,0.6); padding: 45px 70px; border-radius: 30px; backdrop-filter: blur(20px); border: 2px solid rgba(255,215,0,0.4); box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .final-text .highlight { color: #ffd700; font-size: 36px; text-shadow: 0 0 50px rgba(255,215,0,1); font-weight: bold; }
+        .restart-btn { margin-top: 45px; background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,100,100,0.3)); color: #ffd700; border: 3px solid rgba(255,215,0,0.7); padding: 22px 80px; border-radius: 45px; font-size: 22px; cursor: pointer; transition: all 0.3s; letter-spacing: 8px; text-shadow: 0 0 30px rgba(255,215,0,0.6); }
+        .restart-btn:hover { background: linear-gradient(135deg, rgba(255,215,0,0.5), rgba(255,100,100,0.5)); border-color: #ffd700; transform: translateY(-5px); box-shadow: 0 20px 60px rgba(255,215,0,0.6); }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
+    <canvas id="bg-canvas"></canvas>
     
-    <div class="ui-layer">
-        <div class="center-star" id="center-star">
-            <div class="star-icon">✦</div>
-            <div class="hint-text">这颗星，缺了点什么...</div>
-        </div>
-        
-        <div class="star-task hidden" id="memory-star" data-task="memory">
-            <div class="icon">💫</div>
-            <div class="label">记忆星</div>
-        </div>
-        
-        <div class="star-task hidden" id="time-star" data-task="time">
-            <div class="icon">🌙</div>
-            <div class="label">时光星</div>
-        </div>
-        
-        <div class="star-task hidden" id="love-star" data-task="love">
-            <div class="icon">✨</div>
-            <div class="label">告白星</div>
-        </div>
-        
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress"></div>
+    <div class="screen warp-screen active" id="warpScreen">
+        <div class="warp-text">
+            <div>穿越星空</div>
+            <div class="subtitle">寻找遗失的心愿</div>
         </div>
     </div>
     
-    <div class="message-popup" id="popup">
-        <div class="heart">💖</div>
-        <div class="text" id="popup-text"></div>
-        <button class="close-btn" onclick="closePopup()">继续</button>
+    <div class="screen" id="planetsScreen">
+        <div class="planet" id="planet-star" onclick="openGame(1)">⭐<div class="planet-label">记忆之星</div></div>
+        <div class="planet" id="planet-moon" onclick="openGame(2)">🌙<div class="planet-label">时光之月</div></div>
+        <div class="planet" id="planet-heart" onclick="openGame(3)">❤️<div class="planet-label">告白之心</div></div>
     </div>
     
-    <div class="final-message" id="final-message">
-        <div class="rose">🌹</div>
-        <div class="text">
-            遇见你之前，我以为星空就是最美的风景<br>
-            遇见你之后，才发现你眼里的光比星星更亮<br>
-            这颗心，只为你而跳动
+    <div class="game-modal" id="gameModal">
+        <div class="game-content">
+            <div class="game-title" id="gameTitle">游戏</div>
+            <div class="game-instruction" id="gameInstruction">说明</div>
+            <div class="game-area"><canvas id="gameCanvas" width="400" height="320"></canvas></div>
+            <button class="game-btn" id="gameBtn" onclick="startMiniGame()">开始挑战</button>
         </div>
-        <button class="restart-btn" onclick="location.reload()">再看一次</button>
+    </div>
+    
+    <div class="confession-overlay" id="confessionOverlay">
+        <div class="confession-text" id="confessionText"></div>
+    </div>
+    
+    <div class="screen" id="chestScreen">
+        <div class="chest-container">
+            <div class="chest" id="chest">
+                <div class="chest-lid"></div>
+                <div class="chest-body"></div>
+                <div class="chest-lock" onclick="openLock()">🔒</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="lock-modal" id="lockModal">
+        <div class="lock-title">✨ 转动到 3 解锁 ✨</div>
+        <div class="dial-container">
+            <div class="dial-marker"></div>
+            <div class="dial" id="dial"></div>
+            <div class="dial-center"><div class="number" id="dialNumber">0</div></div>
+        </div>
+        <div class="lock-hint">按住转盘拖动旋转</div>
+    </div>
+    
+    <div class="screen" id="finalScreen">
+        <div class="final-beam" id="finalBeam">
+            <div class="beam-core"></div>
+            <div class="beam-glow"></div>
+        </div>
+        <div class="final-rose-container" id="roseContainer">
+            <div class="rose-glow"></div>
+            <div class="final-rose">🌹</div>
+        </div>
+        <div class="final-text-container" id="textContainer">
+            <div class="final-text">
+                <div>遇见你之前，我以为<span class="highlight">星空</span>就是最美的风景</div>
+                <div>遇见你之后，才发现你<span class="highlight">眼里的光</span>比星星更亮</div>
+                <div style="margin-top: 25px; font-size: 40px;">这颗<span class="highlight">心</span>，只为你而跳动</div>
+                <button class="restart-btn" onclick="location.reload()">再次观看</button>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        // 设置画布大小
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-        
-        // 星星类
-        class Star {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.brightness = Math.random();
-                this.twinkleSpeed = Math.random() * 0.02 + 0.01;
-            }
-            
-            draw() {
-                this.brightness += this.twinkleSpeed;
-                const alpha = (Math.sin(this.brightness) + 1) / 2 * 0.8 + 0.2;
-                
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fill();
-                
-                // 光晕
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.2})`;
-                ctx.fill();
-            }
-        }
-        
-        // 创建背景星星
-        const stars = [];
-        for (let i = 0; i < 150; i++) {
-            stars.push(new Star());
-        }
-        
-        // 流星类
-        class ShootingStar {
-            constructor() {
-                this.reset();
-            }
-            
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = 0;
-                this.length = Math.random() * 80 + 20;
-                this.speed = Math.random() * 10 + 5;
-                this.angle = Math.PI / 4;
-                this.opacity = 1;
-                this.active = false;
-            }
-            
-            update() {
-                if (!this.active) {
-                    if (Math.random() < 0.005) {
-                        this.active = true;
-                    }
-                    return;
-                }
-                
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-                this.opacity -= 0.01;
-                
-                if (this.opacity <= 0 || this.x > canvas.width || this.y > canvas.height) {
-                    this.reset();
-                }
-            }
-            
-            draw() {
-                if (!this.active) return;
-                
-                const tailX = this.x - Math.cos(this.angle) * this.length;
-                const tailY = this.y - Math.sin(this.angle) * this.length;
-                
-                const gradient = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
-                gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
-                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-                
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(tailX, tailY);
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-        }
-        
-        const shootingStars = [new ShootingStar(), new ShootingStar()];
-        
-        // 动画循环
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 绘制背景星星
-            stars.forEach(star => star.draw());
-            
-            // 绘制流星
-            shootingStars.forEach(star => {
-                star.update();
-                star.draw();
-            });
-            
-            requestAnimationFrame(animate);
-        }
-        animate();
-        
-        // 游戏状态
-        let completedTasks = 0;
-        const totalTasks = 3;
-        
-        // 任务配置
-        const taskMessages = {
-            memory: {
-                icon: '💫',
-                title: '记忆星',
-                message: '记得我们第一次相遇的那天<br>阳光正好，微风不燥<br>你的笑容，比阳光更暖'
-            },
-            time: {
-                icon: '🌙',
-                title: '时光星',
-                message: '想和你虚度时光<br>比如低头看鱼，比如把茶杯留在桌上<br>离开，浪费它们好看的阴影'
-            },
-            love: {
-                icon: '✨',
-                title: '告白星',
-                message: '其实我想对你说<br>遇见你，是我这辈子最美的意外<br>余生很长，想和你一起浪费'
-            }
-        };
-        
-        // 中心星星点击
-        document.getElementById('center-star').addEventListener('click', function() {
-            this.classList.add('hidden');
-            document.querySelectorAll('.star-task').forEach(task => {
-                task.classList.remove('hidden');
-            });
-        });
-        
-        // 任务星星点击
-        document.querySelectorAll('.star-task').forEach(task => {
-            task.addEventListener('click', function() {
-                if (this.classList.contains('completed')) return;
-                
-                const taskType = this.dataset.task;
-                const config = taskMessages[taskType];
-                
-                showPopup(config.message);
-                
-                this.classList.add('completed');
-                completedTasks++;
-                
-                // 更新进度条
-                document.getElementById('progress').style.width = 
-                    (completedTasks / totalTasks * 100) + '%';
-                
-                // 检查是否全部完成
-                if (completedTasks === totalTasks) {
-                    setTimeout(showFinal, 1500);
-                }
-            });
-        });
-        
-        // 显示弹窗
-        function showPopup(text) {
-            document.getElementById('popup-text').innerHTML = text;
-            document.getElementById('popup').classList.add('show');
-        }
-        
-        // 关闭弹窗
-        function closePopup() {
-            document.getElementById('popup').classList.remove('show');
-        }
-        
-        // 显示最终画面
-        function showFinal() {
-            document.querySelector('.ui-layer').classList.add('hidden');
-            document.querySelector('.progress-bar').classList.add('hidden');
-            
-            // 绘制玫瑰动画
-            drawRoseAnimation();
-            
-            setTimeout(() => {
-                document.getElementById('final-message').classList.add('show');
-            }, 3000);
-        }
-        
-        // 玫瑰动画
-        function drawRoseAnimation() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            let progress = 0;
-            
-            function drawFrame() {
-                if (progress > 1) return;
-                
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                
-                // 绘制玫瑰轮廓
-                ctx.beginPath();
-                for (let i = 0; i < 360 * progress; i++) {
-                    const angle = i * Math.PI / 180;
-                    const r = 100 * Math.sin(4 * angle);
-                    const x = r * Math.cos(angle) * (0.5 + progress * 0.5);
-                    const y = r * Math.sin(angle) * (0.5 + progress * 0.5);
-                    
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 100);
-                gradient.addColorStop(0, `rgba(255, 100, 100, ${progress})`);
-                gradient.addColorStop(0.5, `rgba(255, 50, 50, ${progress * 0.8})`);
-                gradient.addColorStop(1, `rgba(200, 0, 0, ${progress * 0.5})`);
-                
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                ctx.strokeStyle = `rgba(255, 200, 200, ${progress})`;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                ctx.restore();
-                
-                progress += 0.01;
-                requestAnimationFrame(drawFrame);
-            }
-            
-            drawFrame();
-        }
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
